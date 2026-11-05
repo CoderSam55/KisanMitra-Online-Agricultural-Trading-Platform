@@ -17,7 +17,7 @@ const MyListings = () => {
     setLoading(true);
     try {
       const { data } = await getMyListings();
-      setMyListings((data.data || []).map((listing) => ({ ...listing, id: listing._id, qty: listing.quantity })));
+      setMyListings((data.data || []).map((listing) => ({ ...listing, id: listing._id || listing.id, qty: listing.quantity })));
       setError('');
     } catch (e) { setError(e.response?.data?.message || t('listing.loadMineError', 'Could not load your listings.')); }
     finally { setLoading(false); }
@@ -105,7 +105,7 @@ const MyListings = () => {
                       <td className="p-4">
                         <div className="flex items-center gap-4">
                           <div className="w-16 h-16 bg-earth-100 rounded-xl overflow-hidden flex items-center justify-center text-2xl flex-shrink-0">{listing.images?.[0] ? <img src={toMediaUrl(listing.images[0])} alt="" className="w-full h-full object-cover" /> : '🌾'}</div>
-                          <div className="font-bold text-gray-900 text-lg">{listing.title}</div>
+                          <Link to={`/listing/${listing.id}`} className="font-bold text-gray-900 text-lg hover:text-primary-700 hover:underline">{listing.title}</Link>
                         </div>
                       </td>
                       <td className="p-4">
@@ -115,7 +115,6 @@ const MyListings = () => {
                       <td className="p-4">
                         <div className="flex flex-col gap-1 text-sm font-medium">
                           <span className="text-primary-600 bg-primary-50 px-2 py-0.5 rounded-md inline-block w-max">{listing.offersCount || 0} {t('common.offers', 'Offers')}</span>
-                          <span className="text-gray-500 flex items-center gap-1"><Eye size={14}/> {listing.views} {t('listing.views', 'Views')}</span>
                         </div>
                       </td>
                       <td className="p-4">

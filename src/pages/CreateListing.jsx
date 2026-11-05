@@ -41,6 +41,7 @@ const CreateListing = () => {
     grade: 'A',
     organic: false,
     location: user?.location?.district ? `${user.location.district}, ${user.location.state || ''}` : '',
+    brand: '', model: '', year: '', condition: '', rentalPeriod: '',
   });
 
   const nextStep = () => setStep(prev => Math.min(prev + 1, totalSteps));
@@ -83,7 +84,7 @@ const CreateListing = () => {
         title: formData.title.trim(), description: formData.description, category, subCategory,
         transactionType: formData.type, quantity: Number(formData.quantity), unit: formData.unit,
         price: Number(formData.price), negotiable: formData.negotiable, variety: formData.variety,
-        harvestDate: formData.harvestDate, grade: formData.grade, organic: formData.organic, location, images: imageUrls,
+        harvestDate: formData.harvestDate, grade: formData.grade, organic: formData.organic, brand: formData.brand, model: formData.model, year: formData.year, condition: formData.condition, location, images: imageUrls,
       });
       toast.success(t('createListing.published', 'Listing published successfully.'));
       navigate('/my-listings');
@@ -128,6 +129,7 @@ const CreateListing = () => {
               <label className="block text-sm font-bold text-gray-700 mb-2">{t('listing.description', 'Description')}</label>
               <textarea name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-primary-500 outline-none" placeholder={t('createListing.descPlaceholder', 'Describe the quality, harvest condition, packaging etc.')} />
             </div>
+            {formData.category === 'machinery' && <div className="grid sm:grid-cols-2 gap-4 p-4 rounded-xl bg-primary-50"><input name="brand" value={formData.brand} onChange={handleChange} placeholder="Brand" className="border rounded-xl p-3"/><input name="model" value={formData.model} onChange={handleChange} placeholder="Model" className="border rounded-xl p-3"/><input name="year" value={formData.year} onChange={handleChange} placeholder="Year" className="border rounded-xl p-3"/><input name="condition" value={formData.condition} onChange={handleChange} placeholder="Condition" className="border rounded-xl p-3"/></div>}
 
             <div className="flex gap-4">
               <div className="flex-1">
@@ -182,19 +184,8 @@ const CreateListing = () => {
              
              <ImageUploader images={images} onChange={setImages} maxImages={5} label={t('createListing.productPhotos', 'Product Photos')} />
 
-             <div className="grid grid-cols-2 gap-4 mt-6">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">{t('listing.variety')}</label>
-                  <input name="variety" value={formData.variety} onChange={handleChange} className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">{t('listing.grade')}</label>
-                  <select name="grade" value={formData.grade} onChange={handleChange} className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 outline-none bg-white">
-                    <option value="A">{t('listing.gradeA', 'Grade A (Premium)')}</option>
-                    <option value="B">{t('listing.gradeB', 'Grade B (Standard)')}</option>
-                  </select>
-                </div>
-             </div>
+             {formData.category !== 'machinery' && <div className="grid grid-cols-2 gap-4 mt-6"><div><label className="block text-sm font-bold text-gray-700 mb-2">Grade</label><select name="grade" value={formData.grade} onChange={handleChange} className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white"><option value="A">Grade A</option><option value="B">Grade B</option><option value="C">Grade C</option></select></div><div><label className="block text-sm font-bold text-gray-700 mb-2">Harvest Date</label><input type="date" name="harvestDate" value={formData.harvestDate} onChange={handleChange} className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl"/></div></div>}
+
           </div>
         );
       case 5:

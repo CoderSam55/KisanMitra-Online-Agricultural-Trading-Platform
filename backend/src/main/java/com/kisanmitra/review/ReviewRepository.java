@@ -1,1 +1,1 @@
-package com.kisanmitra.review; import org.springframework.data.jpa.repository.JpaRepository; import java.util.*; public interface ReviewRepository extends JpaRepository<Review,UUID>{List<Review> findByTargetUserIdOrderByCreatedAtDesc(UUID id);}
+package com.kisanmitra.review; import org.springframework.data.jpa.repository.JpaRepository; import java.util.*; public interface ReviewRepository extends JpaRepository<Review,UUID>{List<Review> findByTargetUserIdOrderByCreatedAtDesc(UUID id); boolean existsByOfferId(UUID offerId);}

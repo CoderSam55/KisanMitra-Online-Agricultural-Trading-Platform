@@ -52,14 +52,14 @@ export default function Notifications() {
       {loading ? <p className="text-gray-500">{t('common.loading', 'Loading...')}</p> : (
         <div className="bg-white rounded-2xl border divide-y">
           {items.length === 0 ? <p className="p-8 text-center text-gray-500">{t('notifications.empty', 'You have no notifications.')}</p> : items.map((item) => (
-            <article key={item._id} className={`p-5 ${item.read ? '' : 'bg-primary-50/40'}`}>
+            <article key={item._id || item.id} className={`p-5 ${item.read ? '' : 'bg-primary-50/40'}`}>
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="font-semibold text-gray-900">{item.title}</h2>
                   <p className="text-gray-700 mt-1">{item.message}</p>
                   <time className="text-sm text-gray-500 mt-2 block" dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString()}</time>
                 </div>
-                {!item.read && <button onClick={() => markRead(item._id)} className="text-sm text-primary-700 font-semibold whitespace-nowrap">{t('notifications.mark_read', 'Mark read')}</button>}
+                {!item.read && <button onClick={() => markRead(item._id || item.id)} className="text-sm text-primary-700 font-semibold whitespace-nowrap">{t('notifications.mark_read', 'Mark read')}</button>}
               </div>
             </article>
           ))}

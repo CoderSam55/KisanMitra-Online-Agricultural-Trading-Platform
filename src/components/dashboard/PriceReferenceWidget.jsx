@@ -7,12 +7,14 @@ const PriceReferenceWidget = ({ category, location, currentPrice, unit, commodit
   const { t } = useTranslation();
 
   const [refData, setRefData] = useState(null);
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     let cancelled = false;
     const categoryMap = { grains: 'agricultural-produce', vegetables: 'agricultural-produce', fruits: 'agricultural-produce', pulses: 'agricultural-produce', spices: 'agricultural-produce', seeds: 'agri-inputs' };
     getReferencePrice(categoryMap[category] || category, location, unit, commodity)
       .then(({ data }) => { if (!cancelled) setRefData(data.data); })
-      .catch(() => { if (!cancelled) setRefData(null); });
+      .catch(() => { if (!cancelled) setRefData(null); })
+      .finally(() => { if (!cancelled) setLoaded(true); });
     return () => { cancelled = true; };
   }, [category, location, unit, commodity]);
 
@@ -48,7 +50,7 @@ const PriceReferenceWidget = ({ category, location, currentPrice, unit, commodit
 
       <div className="mb-4 text-center py-4 bg-white rounded-xl border border-primary-50">
         <div className="text-3xl font-bold text-accent-600">
-          {refData ? refData.minPrice > 0 ? <>₹{refData.minPrice} <span className="text-xl text-gray-400 font-medium">—</span> ₹{refData.maxPrice}</> : t('common.noData', 'No data') : t('common.loading', 'Loading…')}
+          {!loaded ? t('common.loading', 'Loading…') : refData?.minPrice > 0 ? <>₹{refData.minPrice} <span className="text-xl text-gray-400 font-medium">—</span> ₹{refData.maxPrice}</> : t('common.noData', 'No data')}
         </div>
         <div className="text-sm font-medium text-gray-500 mt-1">
           {refData?.unit ? <>{t('common.per', 'per')} {t(`units.${refData.unit.toLowerCase()}`, refData.unit)}</> : t('reference.unit', 'Reference unit')}

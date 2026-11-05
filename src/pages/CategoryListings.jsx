@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import FilterPanel from '../components/search/FilterPanel';
 import ListingGrid from '../components/listings/ListingGrid';
@@ -19,6 +19,7 @@ const categories = [
 
 const CategoryListings = () => {
   const { categorySlug } = useParams();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
   
@@ -29,8 +30,9 @@ const CategoryListings = () => {
 
   const currentCategory = categories.find(c => c.slug === categorySlug) || { slug: categorySlug, emoji: '📦', name: categorySlug };
 
+  const routeCategory = categorySlug !== 'all' && categorySlug !== 'search' ? categorySlug : '';
   const filters = {
-    category: searchParams.get('category') || (categorySlug !== 'all' && categorySlug !== 'search' ? categorySlug : ''),
+    category: routeCategory || searchParams.get('category') || '',
     type: searchParams.get('type') || '',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
@@ -39,9 +41,16 @@ const CategoryListings = () => {
   };
 
   const updateFilters = (newFilters) => {
+    const nextCategory = newFilters.category || 'all';
+    if (nextCategory !== (routeCategory || 'all')) {
+      const categoryParams = new URLSearchParams();
+      Object.entries(newFilters).forEach(([key, value]) => { if (value && key !== 'category') categoryParams.set(key, value); });
+      navigate(`/marketplace/${nextCategory}${categoryParams.size ? `?${categoryParams}` : ''}`);
+      return;
+    }
     const params = new URLSearchParams();
     Object.entries(newFilters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
+      if (value && key !== 'category') params.set(key, value);
     });
     setSearchParams(params);
   };
@@ -51,7 +60,7 @@ const CategoryListings = () => {
     const loadListings = async () => {
       setLoading(true);
       setLoadError('');
-      const selectedCategory = categories.find((category) => category.slug === filters.category);
+      const selectedCategory = categories.find((category) => category.slug === (routeCategory || filters.category));
       const params = {
         ...((selectedCategory?.category) ? { category: selectedCategory.category } : {}),
         ...(selectedCategory?.subCategory ? { subCategory: selectedCategory.subCategory } : {}),
@@ -72,7 +81,7 @@ const CategoryListings = () => {
             const location = listing.location || {};
             return {
               ...listing,
-              id: listing._id,
+              id: listing._id || listing.id,
               categorySlug: category?.slug || listing.category,
               categoryEmoji: category?.emoji || currentCategory.emoji,
               imageUrl: listing.images?.[0],

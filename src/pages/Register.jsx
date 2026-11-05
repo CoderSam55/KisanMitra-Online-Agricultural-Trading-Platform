@@ -31,19 +31,8 @@ const Register = () => {
   const handleNext = () => {
     // Validation
     if (step === 1) {
-      if (!formData.name || !formData.email || !formData.phone || !formData.password) {
-        toast.error(t('register.fillAllFields', 'Please fill all fields'));
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        toast.error(t('register.passwordMismatch', 'Passwords do not match'));
-        return;
-      }
+      // Local testing mode: field validation is intentionally disabled.
     } else if (step === 2) {
-      if (!formData.state) {
-        toast.error(t('register.selectLocation', 'Please select your location'));
-        return;
-      }
     }
     setStep(prev => prev + 1);
   };
@@ -53,14 +42,9 @@ const Register = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.terms) {
-      toast.error(t('register.acceptTerms', 'Please accept the terms and conditions'));
-      return;
-    }
-
     setLoading(true);
     try {
-      await register({
+      const result = await register({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -73,10 +57,16 @@ const Register = () => {
           taluka: formData.taluka
         }
       });
+      if (result?.confirmationRequired) {
+        toast.success(t('register.confirmEmail', 'Check your email to confirm your account, then log in.'));
+        navigate('/login');
+        return;
+      }
       toast.success(t('register.success', 'Account created successfully!'));
       navigate('/dashboard');
     } catch (err) {
-      const message = err?.response?.data?.message || t('register.error', 'Failed to create account. Please try again.');
+      const response = err?.response?.data;
+      const message = response?.message || response?.errors?.join?.(', ') || (typeof response === 'string' ? response : '') || err?.message || t('register.error', 'Failed to create account. Please try again.');
       toast.error(message);
     } finally {
       setLoading(false);
@@ -117,7 +107,7 @@ const Register = () => {
               </div>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input type="email" placeholder={t('common.email', 'Email Address')} value={formData.email} onChange={e => updateForm('email', e.target.value)} className="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-colors" />
+                <input type="text" placeholder={t('common.email', 'Email or test identifier')} value={formData.email} onChange={e => updateForm('email', e.target.value)} className="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-colors" />
               </div>
               <div className="relative">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />

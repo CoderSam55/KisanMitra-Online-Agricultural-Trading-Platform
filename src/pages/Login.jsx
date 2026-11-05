@@ -62,12 +62,12 @@ const Login = () => {
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
-                  type="email"
+                  type="text"
                   name="email"
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder={t('login.emailPlaceholder', 'Enter your email')}
+                  placeholder={t('login.emailPlaceholder', 'Enter your email or test ID')}
                   className="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-colors"
                 />
               </div>

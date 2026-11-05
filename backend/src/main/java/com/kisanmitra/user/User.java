@@ -1,6 +1,6 @@
 package com.kisanmitra.user;
 
-import jakarta.persistence.*;
+import jakarta.persistence.*; import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +13,8 @@ public class User {
     @Column(nullable=false) private String name;
     @Column(nullable=false, unique=true) private String email;
     private String phone;
-    @Column(nullable=false) private String password;
+    @JsonIgnore private String password;
+    @Column(unique=true) private String supabaseId;
     private String userType = "farmer";
     private String state; private String district; private String taluka; private String village;
     @Column(length=500) private String bio;

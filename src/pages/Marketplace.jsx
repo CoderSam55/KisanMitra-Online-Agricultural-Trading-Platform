@@ -36,7 +36,7 @@ const Marketplace = () => {
         if (!cancelled) setFeaturedListings((data.data.listings || []).map((listing) => {
           const location = listing.location || {};
           const [categorySlug, categoryEmoji] = categoryPresentation[listing.subCategory] || categoryPresentation[listing.category] || ['others', '📦'];
-          return { ...listing, id: listing._id, categorySlug, categoryEmoji, imageUrl: listing.images?.[0],
+          return { ...listing, id: listing._id || listing.id, categorySlug, categoryEmoji, imageUrl: listing.images?.[0],
             location: [location.village, location.district, location.state].filter(Boolean).join(', '),
             offerCount: listing.offersCount || 0, timeAgo: new Date(listing.createdAt).toLocaleDateString() };
         }));

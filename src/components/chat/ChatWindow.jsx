@@ -4,7 +4,6 @@ import { Send, Image as ImageIcon, ArrowLeft } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 import { getMessages, sendMessage } from '../../services/chat';
 import toast from 'react-hot-toast';
-import { useSocket } from '../../contexts/SocketContext';
 
 export default function ChatWindow({ conversationId, conversation, userId, onBack, onSent }) {
   const { t, i18n } = useTranslation();
@@ -12,7 +11,6 @@ export default function ChatWindow({ conversationId, conversation, userId, onBac
   const [text, setText] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { socket } = useSocket();
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -23,26 +21,11 @@ export default function ChatWindow({ conversationId, conversation, userId, onBac
     let cancelled = false;
     setLoading(true);
     getMessages(conversationId)
-      .then(({ data }) => { if (!cancelled) setMessages((data.data.messages || []).map((message) => ({ ...message, id: message._id, isMine: String(message.sender?._id || message.sender) === String(userId), time: new Date(message.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) }))); })
+      .then(({ data }) => { if (!cancelled) setMessages((data.data.messages || []).map((message) => ({ ...message, id: message._id || message.id, isMine: String(message.sender?._id || message.sender?.id || message.sender) === String(userId), time: new Date(message.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) }))); })
       .catch(() => { if (!cancelled) toast.error(t('chat.load_error', 'Could not load messages.')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [conversationId, userId, locale, t]);
-
-  useEffect(() => {
-    if (!socket) return undefined;
-    const receiveMessage = (payload) => {
-      if (String(payload.conversationId) !== String(conversationId)) return;
-      const message = payload.message;
-      setMessages((current) => current.some((item) => item.id === message._id) ? current : [...current, {
-        ...message, id: message._id, isMine: String(message.sender?._id || message.sender) === String(userId),
-        time: new Date(message.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }),
-      }]);
-      onSent?.();
-    };
-    socket.on('new_message', receiveMessage);
-    return () => socket.off('new_message', receiveMessage);
-  }, [socket, conversationId, userId, onSent, locale]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -51,7 +34,7 @@ export default function ChatWindow({ conversationId, conversation, userId, onBac
       const sent = text.trim();
       const { data } = await sendMessage({ conversationId, text: sent });
       const message = data.data;
-      setMessages((current) => [...current, { ...message, id: message._id, isMine: true, time: new Date(message.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) }]);
+      setMessages((current) => [...current, { ...message, id: message._id || message.id, isMine: true, time: new Date(message.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) }]);
       setText('');
       onSent?.();
     } catch { toast.error(t('chat.send_error', 'Could not send message.')); }

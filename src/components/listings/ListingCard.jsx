@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MapPin, Eye, Clock } from 'lucide-react';
+import { MapPin, Clock } from 'lucide-react';
 import { toMediaUrl } from '../../services/api';
 
 const ListingCard = ({ listing }) => {
@@ -60,10 +60,6 @@ const ListingCard = ({ listing }) => {
                   {listing.offerCount || 0}
                 </span>
                 {t('common.offers', 'offers')}
-              </span>
-              <span className="flex items-center gap-1">
-                <Eye size={12} />
-                {listing.views || 0}
               </span>
             </div>
             <span className="flex items-center gap-1">

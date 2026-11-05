@@ -26,7 +26,7 @@ export default function UserProfile({ user }) {
     setStartingChat(true);
     try {
       const { data } = await sendMessage({ recipientId: user._id, text: `Hello, I found your profile on KisanMitra and would like to connect.` });
-      navigate(`/chat/${data.data.conversation}`);
+      navigate(`/chat/${data.data?.conversation?._id || data.data?.conversation || data.data?.conversationId}`);
     } catch { toast.error(t('chat.start_error', 'Could not start a conversation.')); }
     finally { setStartingChat(false); }
   };

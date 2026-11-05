@@ -19,10 +19,10 @@ export default function Chat() {
   const loadConversations = useCallback(async () => {
     try {
       const { data } = await getConversations();
-      const items = (data.data || []).map((conversation) => {
-        const other = conversation.participants.find((participant) => String(participant._id) !== String(user?._id));
+      const items = (data.data?.conversations || data.data || []).map((conversation) => {
+        const other = conversation.otherParticipant || conversation.participants?.find((participant) => String(participant._id || participant.id) !== String(user?._id || user?.id));
         return {
-          id: conversation._id, name: other?.name || t('chat.conversation', 'Conversation'), avatar: other?.avatar,
+          id: conversation._id || conversation.id, name: other?.name || t('chat.conversation', 'Conversation'), avatar: other?.avatar,
           lastMessage: conversation.lastMessage?.text || conversation.listing?.title || t('chat.startConversation', 'Start a conversation'),
           time: conversation.updatedAt ? new Date(conversation.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
           unread: conversation.unreadCount?.[user?._id] || 0,

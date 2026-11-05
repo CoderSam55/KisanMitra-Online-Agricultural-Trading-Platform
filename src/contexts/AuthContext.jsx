@@ -17,7 +17,8 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const res = await api.get('/auth/me');
-          const loadedUser = { ...res.data.data, _id: res.data.data._id || res.data.data.id };
+          const responseUser = res.data.data.user || res.data.data;
+          const loadedUser = { ...responseUser, _id: responseUser._id || responseUser.id };
           setUser(loadedUser);
           if (loadedUser.preferredLanguage && !localStorage.getItem('language-manual')) {
             changeLanguage(loadedUser.preferredLanguage, { persist: false });
@@ -47,12 +48,16 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     const res = await api.post('/auth/register', userData);
+    if (res.data.data?.confirmationRequired) {
+      return { confirmationRequired: true, email: res.data.data.email };
+    }
     const { token, user: responseUser } = res.data.data;
     const user = { ...responseUser, _id: responseUser._id || responseUser.id };
     localStorage.setItem('token', token);
     setToken(token);
     setUser(user);
     if (user.preferredLanguage) changeLanguage(user.preferredLanguage, { persist: false });
+    return { confirmationRequired: false };
   };
 
   const logout = () => {

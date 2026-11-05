@@ -43,7 +43,7 @@ const Profile = () => {
   const profileLocation = [location.village, location.district, location.state].filter(Boolean).join(', ') || t('location.notSet', 'Location not set');
   const locale = i18n.language === 'hi' ? 'hi-IN' : i18n.language === 'mr' ? 'mr-IN' : 'en-IN';
   const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString(locale) : '—';
-  const cards = listings.map((listing) => ({ ...listing, id: listing._id, imageUrl: listing.images?.[0], location: [listing.location?.district, listing.location?.state].filter(Boolean).join(', '), categorySlug: listing.subCategory || listing.category }));
+  const cards = listings.map((listing) => ({ ...listing, id: listing._id || listing.id, imageUrl: listing.images?.[0], location: [listing.location?.district, listing.location?.state].filter(Boolean).join(', '), categorySlug: listing.subCategory || listing.category }));
 
   return (
     <div className="min-h-screen bg-earth-50 py-8 px-4"><div className="max-w-5xl mx-auto space-y-6">

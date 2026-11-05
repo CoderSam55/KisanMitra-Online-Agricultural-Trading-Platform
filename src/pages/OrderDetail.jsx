@@ -46,7 +46,7 @@ export default function OrderDetail() {
     const other = isBuyer ? order.seller : order.buyer;
     try {
       const { data } = await sendMessage({ recipientId: other._id, listingId: order.listing?._id, text: t('orders.messageAboutOrder', 'Hello, I’m contacting you about order {{orderNumber}}.', { orderNumber: order.orderNumber }) });
-      navigate(`/chat/${data.data.conversation}`);
+      navigate(`/chat/${data.data?.conversation?._id || data.data?.conversation || data.data?.conversationId}`);
     } catch { toast.error(t('chat.start_error', 'Could not start a conversation.')); }
   };
   const submitReview = async ({ rating, comment, reviewedUserId }) => {

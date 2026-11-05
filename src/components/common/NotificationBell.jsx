@@ -57,7 +57,7 @@ export default function NotificationBell() {
             {!loading && error && <p role="alert" className="p-4 text-sm text-red-600">{error}</p>}
             {!loading && !error && notifications.length === 0 && <p className="p-4 text-sm text-gray-500">{t('notifications.empty', 'No notifications yet.')}</p>}
             {!loading && !error && notifications.map(n => (
-              <div key={n._id} className={`p-4 border-b flex gap-3 ${!n.read ? 'bg-primary-50/30' : ''}`}>
+              <div key={n._id || n.id} className={`p-4 border-b flex gap-3 ${!n.read ? 'bg-primary-50/30' : ''}`}>
                 <div className="w-8 h-8 rounded-full bg-primary-100 flex-shrink-0 flex items-center justify-center text-primary-600"><Bell className="w-4 h-4" /></div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold">{n.title}</p>

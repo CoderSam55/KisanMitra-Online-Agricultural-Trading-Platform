@@ -67,9 +67,9 @@ Designed to make the platform accessible to users from different linguistic back
 |---|---|
 | Frontend | React.js, Vite |
 | Styling | Tailwind CSS |
-| Backend | Node.js, Express.js |
-| Database | MongoDB |
-| Authentication | JSON Web Token (JWT) |
+| Backend | Java 21, Spring Boot 3 |
+| Database | Supabase PostgreSQL |
+| Authentication | Supabase Auth, KisanMitra API JWT |
 | Real-Time Communication | Socket.IO |
 | Internationalization | i18next |
 | Development Tools | npm, Git, GitHub |
@@ -81,22 +81,9 @@ Designed to make the platform accessible to users from different linguistic back
 ```text
 KisanMitra/
 │
-├── client/                     # React frontend
-│   ├── public/
-│   │   └── locales/            # English, Hindi, Marathi translations
-│   └── src/
-│       ├── components/
-│       ├── pages/
-│       ├── services/
-│       └── ...
-│
-├── server/                     # Express backend
-│   ├── config/                 # Database and socket configuration
-│   ├── controllers/            # Request handling logic
-│   ├── middleware/             # Authentication and authorization
-│   ├── models/                 # MongoDB models
-│   ├── routes/                  # API routes
-│   └── ...
+├── src/                         # React frontend
+├── backend/                     # Spring Boot API and Supabase config
+├── server/                      # Legacy Express backend
 │
 ├── package.json                # Root scripts and dependencies
 └── README.md
@@ -114,7 +101,8 @@ Make sure you have installed:
 
 - [Node.js](https://nodejs.org/) (v20.19 or newer)
 - npm
-- [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas) account or another accessible MongoDB deployment
+- Java 21 and Maven
+- A Supabase project with Email and Password authentication enabled
 - Git
 
 ### 2. Clone the Repository
@@ -126,55 +114,25 @@ cd KisanMitra
 
 ### 3. Install Dependencies
 
-Install the root, backend, and frontend dependencies.
+Install the frontend dependencies:
 
 ```bash
 npm install
-
-cd server
-npm install
-
-cd ../client
-npm install
-
-cd ..
 ```
 
 ### 4. Configure Environment Variables
 
-Create the backend environment file.
-
-**Windows PowerShell:**
+Copy the backend template and set the Supabase Postgres connection, Supabase project URL, Auth API key, and a private JWT secret. The Spring backend loads `backend/.env` automatically when started from `backend/`.
 
 ```powershell
-Copy-Item server/.env.example server/.env
+Copy-Item backend/.env.example backend/.env
 ```
 
-Open `server/.env` and configure:
-
-```env
-NODE_ENV=development
-PORT=5000
-
-CLIENT_URL=http://localhost:5173
-
-JWT_SECRET=your_long_random_secret
-JWT_EXPIRE=30d
-
-MONGODB_URI=your_mongodb_connection_string
-```
-
-**Important:**
-- Replace the MongoDB URI with your actual database connection string.
-- Use a strong, private JWT secret.
-- Never commit `.env` files to GitHub.
-- URL-encode special characters in MongoDB passwords.
-
-During development, the backend can fall back to a temporary in-memory MongoDB instance if Atlas is unavailable. Data stored in this fallback is not persistent.
+Keep the service-role key and database password on the backend only. Never commit `backend/.env` or expose a service-role key in a `VITE_*` variable.
 
 ### 5. Configure Frontend Environment (Optional)
 
-Create `client/.env`:
+Create a root `.env` only if you need a different backend host:
 
 ```env
 VITE_API_TARGET=http://localhost:5000
@@ -183,7 +141,14 @@ VITE_API_BASE_URL=/api
 
 ### 6. Run the Application
 
-From the project root:
+Start the backend in one terminal:
+
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+Start the frontend in another terminal from the project root:
 
 ```bash
 npm run dev
@@ -197,23 +162,13 @@ The application will be available at:
 | Backend API | http://localhost:5000 |
 | Backend Health Check | http://localhost:5000/api/health |
 
-A successful health check should indicate that the database is connected.
-
-**Run separately if required:**
-
-```bash
-npm run server
-```
-
-```bash
-npm run client
-```
+The health endpoint reports the active database connection and returns HTTP 503 if it is unavailable.
 
 ---
 
 ## 🚀 Production Deployment
 
-The replacement backend is being built in `backend/` as a Spring Boot 3 service backed by PostgreSQL. For local development, start PostgreSQL with `docker compose -f backend/docker-compose.yml up -d`, then run the API from `backend/` with `mvn spring-boot:run`. Configure `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, and `JWT_SECRET` in the environment. The React client continues to use the `/api` base path.
+The API in `backend/` is a Spring Boot 3 service backed by PostgreSQL and Supabase Auth. Set its environment variables through the deployment platform. The React client continues to use the `/api` base path.
 
 KisanMitra supports separate frontend and backend deployments.
 
@@ -221,31 +176,36 @@ KisanMitra supports separate frontend and backend deployments.
 
 1. Create a new Web Service on [Render](https://render.com/).
 2. Connect your GitHub repository.
-3. Set the root directory to `server`.
+3. Set the root directory to `backend`.
 4. Configure:
 
 | Setting | Value |
 |---|---|
-| Build Command | `npm ci` |
-| Start Command | `npm start` |
+| Runtime | Java 21 |
+| Build Command | `mvn -q -DskipTests package` |
+| Start Command | `java -jar target/kisanmitra-api-1.0.0.jar` |
 | Health Check Path | `/api/health` |
 
 Add these environment variables:
 
 ```env
-NODE_ENV=production
 CLIENT_URL=https://your-frontend-domain
-JWT_SECRET=your_production_secret
-JWT_EXPIRE=30d
-MONGODB_URI=your_mongodb_connection_string
+DATABASE_URL=jdbc:postgresql://your-supabase-host:5432/postgres?sslmode=require
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=your_database_password
+DATABASE_DRIVER=org.postgresql.Driver
+JWT_SECRET=your_private_secret_at_least_32_characters
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_server_only_service_role_key
 ```
 
-Ensure MongoDB Atlas allows connections from your backend hosting environment.
+Keep the service-role key and database credentials in the backend environment only.
 
 ### Frontend Deployment – Vercel
 
 1. Import your GitHub repository into [Vercel](https://vercel.com/).
-2. Set the root directory to `client`.
+2. Set the root directory to the repository root.
 3. Configure the build environment variable:
 
 ```env
@@ -264,8 +224,8 @@ After deployment, test registration, login, marketplace browsing, and backend co
 
 - JWT secrets and database credentials must remain private.
 - Environment variables should be configured through deployment dashboards.
-- Production requires a working MongoDB connection.
-- Uploaded listing images currently use local server storage. Persistent object storage should be configured before relying on production image uploads.
+- Production requires working Supabase Postgres and Email/Password Auth configuration.
+- Uploaded listing images use Supabase Storage; keep its service-role key on the backend only.
 - Market price records currently contain sample data. A maintained and validated market-price source is required before presenting prices as live market data.
 - Free hosting services may sleep after inactivity, resulting in slower initial requests.
 
@@ -277,13 +237,11 @@ Run commands from the repository root unless specified otherwise.
 
 | Command | Description |
 |---|---|
-| `npm install` | Install root dependencies |
-| `npm run dev` | Start frontend and backend |
-| `npm run server` | Start backend in development mode |
-| `npm run client` | Start frontend development server |
+| `npm install` | Install frontend dependencies |
+| `cd backend && mvn spring-boot:run` | Start the backend |
+| `npm run dev` | Start the frontend |
 | `npm run build` | Build frontend for production |
-| `npm start` | Start backend in production mode (inside server) |
-| `npm run lint` | Run frontend ESLint (inside client) |
+| `npm run lint` | Run frontend ESLint |
 
 ---
 
