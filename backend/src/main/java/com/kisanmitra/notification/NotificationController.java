@@ -1,0 +1,7 @@
+package com.kisanmitra.notification;
+import com.kisanmitra.user.User; import lombok.RequiredArgsConstructor; import org.springframework.http.*; import org.springframework.security.core.Authentication; import org.springframework.web.bind.annotation.*; import org.springframework.web.server.ResponseStatusException; import java.util.*;
+@RestController @RequestMapping("/api/notifications") @RequiredArgsConstructor public class NotificationController { private final NotificationRepository notifications;
+ @GetMapping public Map<String,Object> all(Authentication a){return Map.of("success",true,"data",notifications.findByRecipientIdOrderByCreatedAtDesc(user(a).getId()));}
+ @PatchMapping("/{id}/read") public Map<String,Object> read(@PathVariable UUID id,Authentication a){Notification n=notifications.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));if(!n.getRecipient().getId().equals(user(a).getId()))throw new ResponseStatusException(HttpStatus.FORBIDDEN);n.setRead(true);return Map.of("success",true,"data",notifications.save(n));}
+ @PatchMapping("/read-all") public Map<String,Object> readAll(Authentication a){var ns=notifications.findByRecipientIdOrderByCreatedAtDesc(user(a).getId());ns.forEach(n->n.setRead(true));notifications.saveAll(ns);return Map.of("success",true);}
+ private User user(Authentication a){if(a==null||!(a.getPrincipal() instanceof User u))throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);return u;}}

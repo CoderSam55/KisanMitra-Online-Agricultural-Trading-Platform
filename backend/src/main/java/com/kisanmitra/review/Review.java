@@ -1,0 +1,2 @@
+package com.kisanmitra.review; import com.kisanmitra.user.User; import jakarta.persistence.*; import lombok.*; import java.time.Instant; import java.util.UUID;
+@Entity @Table(name="reviews") @Getter @Setter @NoArgsConstructor public class Review { @Id @GeneratedValue(strategy=GenerationType.UUID) UUID id; @ManyToOne(optional=false) User reviewer; @ManyToOne(optional=false) User targetUser; int rating; @Column(length=1000) String comment; @Column(length=1000) String response; Instant createdAt=Instant.now(); }

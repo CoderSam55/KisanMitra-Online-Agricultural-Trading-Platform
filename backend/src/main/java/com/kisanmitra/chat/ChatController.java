@@ -1,0 +1,3 @@
+package com.kisanmitra.chat;
+import lombok.RequiredArgsConstructor; import org.springframework.messaging.handler.annotation.MessageMapping; import org.springframework.messaging.handler.annotation.SendTo; import org.springframework.stereotype.Controller; import java.time.Instant;
+@Controller @RequiredArgsConstructor public class ChatController { public record ChatMessage(String conversationId,String senderId,String text,Instant createdAt){} @MessageMapping("/chat.send") @SendTo("/topic/chat") public ChatMessage send(ChatMessage m){return new ChatMessage(m.conversationId(),m.senderId(),m.text(),Instant.now());} }

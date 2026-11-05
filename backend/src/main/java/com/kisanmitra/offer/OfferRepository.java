@@ -1,0 +1,1 @@
+package com.kisanmitra.offer; import org.springframework.data.jpa.repository.JpaRepository; import java.util.*; public interface OfferRepository extends JpaRepository<Offer,UUID>{ List<Offer> findByBuyerIdOrderByCreatedAtDesc(UUID id); List<Offer> findByListingIdOrderByCreatedAtDesc(UUID id); }

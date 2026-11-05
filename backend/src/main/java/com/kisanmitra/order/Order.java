@@ -1,0 +1,3 @@
+package com.kisanmitra.order;
+import com.kisanmitra.listing.Listing; import com.kisanmitra.user.User; import jakarta.persistence.*; import lombok.*; import java.time.Instant; import java.util.UUID;
+@Entity @Table(name="orders") @Getter @Setter @NoArgsConstructor public class Order { @Id @GeneratedValue(strategy=GenerationType.UUID) UUID id; @Column(unique=true) String orderNumber="KM-"+System.currentTimeMillis(); @ManyToOne(optional=false) Listing listing; @ManyToOne(optional=false) User buyer; @ManyToOne(optional=false) User seller; double agreedPrice; double quantity; String unit; double totalAmount; String status="created"; String cancellationReason; Instant createdAt=Instant.now(); }

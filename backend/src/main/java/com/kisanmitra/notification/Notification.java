@@ -1,0 +1,2 @@
+package com.kisanmitra.notification; import com.kisanmitra.user.User; import jakarta.persistence.*; import lombok.*; import java.time.Instant; import java.util.UUID;
+@Entity @Table(name="notifications") @Getter @Setter @NoArgsConstructor public class Notification { @Id @GeneratedValue(strategy=GenerationType.UUID) UUID id; @ManyToOne(optional=false) User recipient; String type; String title; @Column(length=1000) String message; boolean read; Instant createdAt=Instant.now(); }

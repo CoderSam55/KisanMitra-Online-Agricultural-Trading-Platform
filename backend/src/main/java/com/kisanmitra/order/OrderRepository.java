@@ -1,0 +1,1 @@
+package com.kisanmitra.order; import org.springframework.data.jpa.repository.JpaRepository; import java.util.*; public interface OrderRepository extends JpaRepository<Order,UUID>{List<Order> findByBuyerIdOrSellerIdOrderByCreatedAtDesc(UUID b,UUID s);}
