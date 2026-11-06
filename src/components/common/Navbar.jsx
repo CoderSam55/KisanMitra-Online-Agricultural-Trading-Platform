@@ -21,14 +21,16 @@ const Navbar = () => {
       return;
     }
     let cancelled = false;
-    getNotifications({ limit: 1 })
+    const refresh = () => getNotifications({ limit: 1 })
       .then((response) => {
         if (!cancelled) setUnreadNotificationCount(response.data.data.unreadCount || 0);
       })
       .catch(() => {
         if (!cancelled) setUnreadNotificationCount(0);
       });
-    return () => { cancelled = true; };
+    refresh();
+    const timer = window.setInterval(refresh, 15000);
+    return () => { cancelled = true; window.clearInterval(timer); };
   }, [isAuthenticated, location.pathname]);
 
   const navLinks = [

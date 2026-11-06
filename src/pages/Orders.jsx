@@ -26,13 +26,13 @@ export default function Orders() {
 
   const filteredOrders = useMemo(() => orders.filter((order) => {
     const roleMatches = activeTab === 'buyer'
-      ? String(order.buyer?._id) === String(user?._id)
-      : String(order.seller?._id) === String(user?._id);
+      ? String(order.buyer?._id || order.buyer?.id) === String(user?._id || user?.id)
+      : String(order.seller?._id || order.seller?.id) === String(user?._id || user?.id);
     const statusMatches = filter === 'all' || (filter === 'active' ? !['completed', 'cancelled'].includes(order.status) : order.status === filter);
     return roleMatches && statusMatches;
   }).map((order) => ({
     ...order,
-    id: order._id,
+    id: order._id || order.id,
     title: order.listing?.title || 'Listing no longer available',
     price: order.agreedPrice,
     total: order.totalAmount,

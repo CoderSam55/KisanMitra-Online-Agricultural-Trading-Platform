@@ -74,7 +74,7 @@ const FarmerDashboard = ({ user = { name: 'Farmer' } }) => {
             <Link to="/my-listings" className="text-primary-600 font-semibold hover:text-primary-700">{t('common.viewAll', 'View All')}</Link>
           </div>
           <div className="space-y-4">
-            {activeListings.length ? activeListings.slice(0, 3).map((listing) => <Link to={`/listing/${listing._id}`} key={listing._id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:bg-earth-50 transition-colors">
+            {activeListings.length ? activeListings.slice(0, 3).map((listing) => <Link to={`/listing/${listing._id || listing.id}`} key={listing._id || listing.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:bg-earth-50 transition-colors">
               <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                 {listing.images?.[0] ? <img src={toMediaUrl(listing.images[0])} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-2xl bg-earth-100">🌾</div>}
               </div>

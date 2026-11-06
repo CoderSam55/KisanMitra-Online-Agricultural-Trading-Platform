@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, ChevronRight, Check } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const categories = [
   { id: 'grains', icon: '🌾' },
@@ -18,6 +19,7 @@ const categoryNameKeys = { grains: 'categories.cereals', vegetables: 'categories
 const Home = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -141,7 +143,7 @@ const Home = () => {
           </p>
           <div className="flex justify-center">
             <Link to="/register" className="bg-primary-600 hover:bg-primary-700 text-white rounded-xl px-10 py-4 font-semibold text-xl transition-colors shadow-lg hover:shadow-xl inline-flex items-center gap-2">
-              {t('common.register', 'Register Now')} <ChevronRight className="w-6 h-6" />
+              {isAuthenticated ? t('nav.dashboard', 'Go to Dashboard') : t('common.register', 'Register Now')} <ChevronRight className="w-6 h-6" />
             </Link>
           </div>
           <div className="flex flex-wrap justify-center gap-4 text-gray-600 text-sm mt-6">

@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { SocketProvider } from './contexts/SocketContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import PublicOnlyRoute from './components/common/PublicOnlyRoute';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 
@@ -41,8 +42,8 @@ function App() {
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
+                    <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+                    <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
                     <Route path="/marketplace" element={<Marketplace />} />
                     <Route path="/marketplace/:categorySlug" element={<CategoryListings />} />
                     <Route path="/listing/:id" element={<ListingDetail />} />

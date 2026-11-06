@@ -8,7 +8,7 @@ import { MessageCircle, MapPin, Phone, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getOrder, updateOrderStatus, cancelOrder } from '../services/orders';
 import { createReview } from '../services/reviews';
-import { sendMessage } from '../services/chat';
+import { createConversation } from '../services/chat';
 import { toMediaUrl } from '../services/api';
 
 export default function OrderDetail() {
@@ -42,11 +42,11 @@ export default function OrderDetail() {
     finally { setBusy(false); }
   };
   const messageOtherParty = async () => {
-    const isBuyer = String(order.buyer?._id) === String(user?._id);
+    const isBuyer = String(order.buyer?._id || order.buyer?.id) === String(user?._id || user?.id);
     const other = isBuyer ? order.seller : order.buyer;
     try {
-      const { data } = await sendMessage({ recipientId: other._id, listingId: order.listing?._id, text: t('orders.messageAboutOrder', 'Hello, I’m contacting you about order {{orderNumber}}.', { orderNumber: order.orderNumber }) });
-      navigate(`/chat/${data.data?.conversation?._id || data.data?.conversation || data.data?.conversationId}`);
+      const { data } = await createConversation({ recipientId: other._id || other.id, listingId: order.listing?._id || order.listing?.id });
+      navigate(`/chat/${data.data?.conversation?.id || data.data?.conversation?._id}`);
     } catch { toast.error(t('chat.start_error', 'Could not start a conversation.')); }
   };
   const submitReview = async ({ rating, comment, reviewedUserId }) => {
@@ -56,7 +56,7 @@ export default function OrderDetail() {
 
   if (loading) return <div className="p-12 text-center">{t('orders.loading', 'Loading order…')}</div>;
   if (!order) return <div className="p-12 text-center">{t('orders.notFound', 'Order not found.')} <Link to="/orders" className="text-primary-700">{t('orders.backToOrders', 'Back to orders')}</Link></div>;
-  const isBuyer = String(order.buyer?._id) === String(user?._id);
+  const isBuyer = String(order.buyer?._id || order.buyer?.id) === String(user?._id || user?.id);
   const other = isBuyer ? order.seller : order.buyer;
   const location = other?.location || {};
   const address = [location.village, location.taluka, location.district, location.state].filter(Boolean).join(', ') || 'Location not provided';

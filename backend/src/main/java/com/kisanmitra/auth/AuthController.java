@@ -61,6 +61,7 @@ public class AuthController {
         }
         return ResponseEntity.ok(Map.of("success", true, "data", Map.of("user", safe(user))));
     }
+    @PutMapping("/profile") public ResponseEntity<?> profile(@RequestBody Map<String,Object> body, Authentication authentication) { if(authentication==null||!(authentication.getPrincipal() instanceof User user)) return ResponseEntity.status(401).build(); if(body.containsKey("name")) user.setName(String.valueOf(body.get("name")).trim()); if(body.containsKey("bio")) user.setBio(String.valueOf(body.get("bio"))); if(body.containsKey("phone")) user.setPhone(String.valueOf(body.get("phone"))); if(body.containsKey("userType")) user.setUserType(String.valueOf(body.get("userType"))); if(body.containsKey("preferredLanguage")) user.setPreferredLanguage(String.valueOf(body.get("preferredLanguage"))); if(body.get("location") instanceof Map<?,?> location){user.setState(String.valueOf(location.getOrDefault("state","")));user.setDistrict(String.valueOf(location.getOrDefault("district","")));user.setTaluka(String.valueOf(location.getOrDefault("taluka","")));user.setVillage(String.valueOf(location.getOrDefault("village","")));} return ResponseEntity.ok(Map.of("success",true,"data",safe(users.save(user)))); }
 
     @ExceptionHandler(SupabaseAuthException.class)
     public ResponseEntity<?> handleSupabaseError(SupabaseAuthException error) {
@@ -114,6 +115,9 @@ public class AuthController {
         result.put("userType", user.getUserType());
         result.put("role", user.getRole());
         result.put("preferredLanguage", user.getPreferredLanguage());
+        result.put("bio", user.getBio() == null ? "" : user.getBio());
+        result.put("createdAt", user.getCreatedAt());
+        result.put("location", Map.of("state", user.getState()==null?"":user.getState(), "district", user.getDistrict()==null?"":user.getDistrict(), "taluka", user.getTaluka()==null?"":user.getTaluka(), "village", user.getVillage()==null?"":user.getVillage()));
         return result;
     }
 

@@ -15,6 +15,7 @@ public class Listing {
     private String subCategory; private String transactionType = "sell";
     private double price; private String unit = "KG"; private double quantity; private boolean negotiable = true;
     @Column(name="images", columnDefinition="text") @com.fasterxml.jackson.annotation.JsonIgnore private String imagesJson; private String video; private String variety; private String harvestDate; private String grade; private boolean organic;
+    private String brand; private String model; private String year; private String condition;
     @Transient public List<String> getImages(){ try { return imagesJson==null||imagesJson.isBlank()?List.of():new ObjectMapper().readValue(imagesJson,new TypeReference<List<String>>(){}); } catch(Exception e){ return imagesJson==null?List.of():List.of(imagesJson); } }
     public void setImages(List<String> images){ try { this.imagesJson=new ObjectMapper().writeValueAsString(images==null?List.of():images); } catch(Exception e){ this.imagesJson="[]"; } }
     private String state; private String district; private String taluka; private String village;

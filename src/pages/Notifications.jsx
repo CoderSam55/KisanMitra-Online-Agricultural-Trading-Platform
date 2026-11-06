@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getNotifications, markAllNotificationsRead, markNotificationRead } from '../services/notifications';
+import { getNotifications, markAllNotificationsRead, markNotificationRead, deleteNotification, clearNotifications } from '../services/notifications';
 
 export default function Notifications() {
   const { t } = useTranslation();
@@ -39,14 +39,14 @@ export default function Notifications() {
       setError(t('notifications.update_error', 'Could not update notifications.'));
     }
   };
+  const clearOne = async (id) => { try { await deleteNotification(id); setItems(current => current.filter(item => (item._id || item.id) !== id)); } catch { setError('Could not clear notification.'); } };
+  const clearAll = async () => { try { await clearNotifications(); setItems([]); } catch { setError('Could not clear notifications.'); } };
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="text-3xl font-bold text-gray-900">{t('notifications.title', 'Notifications')}</h1>
-        <button onClick={markAllRead} disabled={!items.some((item) => !item.read)} className="text-primary-700 font-semibold disabled:opacity-50">
-          {t('notifications.mark_all_read', 'Mark all as read')}
-        </button>
+        <div className="flex gap-3"><button onClick={markAllRead} disabled={!items.some((item) => !item.read)} className="text-primary-700 font-semibold disabled:opacity-50">{t('notifications.mark_all_read', 'Mark all as read')}</button><button onClick={clearAll} disabled={!items.length} className="text-red-600 font-semibold disabled:opacity-50">Clear all</button></div>
       </div>
       {error && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
       {loading ? <p className="text-gray-500">{t('common.loading', 'Loading...')}</p> : (
@@ -59,7 +59,7 @@ export default function Notifications() {
                   <p className="text-gray-700 mt-1">{item.message}</p>
                   <time className="text-sm text-gray-500 mt-2 block" dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString()}</time>
                 </div>
-                {!item.read && <button onClick={() => markRead(item._id || item.id)} className="text-sm text-primary-700 font-semibold whitespace-nowrap">{t('notifications.mark_read', 'Mark read')}</button>}
+                <div className="flex gap-3"><button onClick={() => clearOne(item._id || item.id)} className="text-sm text-red-600 font-semibold whitespace-nowrap">Clear</button>{!item.read && <button onClick={() => markRead(item._id || item.id)} className="text-sm text-primary-700 font-semibold whitespace-nowrap">{t('notifications.mark_read', 'Mark read')}</button>}</div>
               </div>
             </article>
           ))}

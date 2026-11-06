@@ -18,21 +18,21 @@ const Profile = () => {
   const [listings, setListings] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({});
 
   useEffect(() => {
     getMyListings().then(({ data }) => setListings(data.data || [])).catch(() => setListings([]));
     if (user?._id) getUserReviews(user._id).then(({ data }) => setReviews(data.data || [])).catch(() => setReviews([]));
   }, [user?._id]);
 
-  const editProfile = async () => {
-    const name = window.prompt(t('common.yourName', 'Your name'), user?.name || '');
-    if (name === null) return;
-    const bio = window.prompt(t('profile.aboutYou', 'About you'), user?.bio || '');
-    if (bio === null) return;
+  const editProfile = async (event) => {
+    event.preventDefault();
     setSaving(true);
     try {
-      const { data } = await updateProfile({ name: name.trim(), bio });
+      const { data } = await updateProfile(form);
       updateUser(data.data);
+      setEditing(false);
       toast.success(t('profile.updated', 'Profile updated.'));
     } catch { toast.error(t('profile.updateError', 'Could not update profile.')); }
     finally { setSaving(false); }
@@ -48,13 +48,13 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-earth-50 py-8 px-4"><div className="max-w-5xl mx-auto space-y-6">
       <section className="bg-white rounded-3xl shadow-sm border overflow-hidden"><div className="h-32 bg-gradient-to-r from-primary-600 to-primary-800"/><div className="px-6 sm:px-10 pb-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end -mt-14 mb-6 gap-4"><div className="flex items-end gap-5"><div className="w-24 h-24 rounded-full bg-primary-100 border-4 border-white shadow flex items-center justify-center text-3xl font-bold text-primary-700">{user.avatar ? <img src={user.avatar} alt="" className="w-full h-full rounded-full object-cover"/> : user.name?.[0]}</div><div className="pb-2"><h1 className="text-3xl font-bold text-gray-900">{user.name}</h1><span className="inline-block bg-earth-100 text-earth-800 px-3 py-1 rounded-full text-sm font-semibold mt-1">{t(`userTypes.${user.userType?.toLowerCase()}`, user.userType || t('common.member', 'Member'))}</span></div></div><button disabled={saving} onClick={editProfile} className="bg-primary-600 hover:bg-primary-700 text-white rounded-xl px-6 py-2 font-semibold flex items-center gap-2 disabled:opacity-50"><Edit className="w-4 h-4"/>{saving ? t('common.saving', 'Saving…') : t('profile.edit', 'Edit Profile')}</button></div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end -mt-14 mb-6 gap-4"><div className="flex items-end gap-5"><div className="w-24 h-24 rounded-full bg-primary-100 border-4 border-white shadow flex items-center justify-center text-3xl font-bold text-primary-700">{user.avatar ? <img src={user.avatar} alt="" className="w-full h-full rounded-full object-cover"/> : user.name?.[0]}</div><div className="pb-2"><h1 className="text-3xl font-bold text-gray-900">{user.name}</h1><span className="inline-block bg-earth-100 text-earth-800 px-3 py-1 rounded-full text-sm font-semibold mt-1">{t(`userTypes.${user.userType?.toLowerCase()}`, user.userType || t('common.member', 'Member'))}</span></div></div><button disabled={saving} onClick={() => {setForm({name:user.name||'',bio:user.bio||'',phone:user.phone||'',userType:user.userType||'farmer',preferredLanguage:user.preferredLanguage||'en',location:user.location||{}});setEditing(true)}} className="bg-primary-600 hover:bg-primary-700 text-white rounded-xl px-6 py-2 font-semibold flex items-center gap-2 disabled:opacity-50"><Edit className="w-4 h-4"/>{t('profile.edit', 'Edit Profile')}</button></div>
         <div className="grid md:grid-cols-3 gap-8"><div className="md:col-span-2 space-y-5"><div><h2 className="text-lg font-bold mb-2">{t('profile.about', 'About Me')}</h2><p className="text-gray-600 bg-gray-50 p-4 rounded-xl">{user.bio || t('profile.emptyBioHint', 'Tell buyers a little about yourself by editing your profile.')}</p></div><div className="flex flex-wrap gap-4 text-sm text-gray-600"><span className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg"><MapPin className="w-4 h-4 text-primary-600"/>{profileLocation}</span><span className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg"><Calendar className="w-4 h-4 text-primary-600"/>{t('profile.memberSince', 'Member since')} {memberSince}</span></div><div className="flex gap-3"><VerificationBadge type="phone" verified={user.verifiedPhone}/><VerificationBadge type="identity" verified={user.verifiedIdentity}/></div></div>
           <div className="bg-primary-50 rounded-2xl p-6 border border-primary-100 space-y-4"><h2 className="font-bold text-primary-900">{t('profile.stats', 'Activity Stats')}</h2><div className="flex justify-between"><span><Package className="inline w-4 mr-2"/>{t('profile.activeListings', 'Active listings')}</span><b>{listings.filter((item) => item.status === 'active').length}</b></div><div className="flex justify-between"><span><Star className="inline w-4 mr-2"/>{t('profile.rating', 'Rating')}</span><b>{user.rating || 0} ({user.ratingsCount || 0})</b></div><div className="flex justify-between"><span><MessageCircle className="inline w-4 mr-2"/>{t('profile.completedTrades', 'Completed trades')}</span><b>{user.transactionsCount || 0}</b></div></div>
         </div>
       </div></section>
       <section className="bg-white rounded-3xl border overflow-hidden"><div className="flex border-b"><button onClick={() => setActiveTab('listings')} className={`flex-1 py-4 font-bold ${activeTab === 'listings' ? 'text-primary-700 border-b-2 border-primary-600 bg-primary-50' : 'text-gray-500'}`}>{t('profile.myListings', 'My listings')}</button><button onClick={() => setActiveTab('reviews')} className={`flex-1 py-4 font-bold ${activeTab === 'reviews' ? 'text-primary-700 border-b-2 border-primary-600 bg-primary-50' : 'text-gray-500'}`}>{t('profile.myReviews', 'My reviews')}</button></div><div className="p-6">{activeTab === 'listings' ? cards.length ? <ListingGrid listings={cards}/> : <div className="text-center py-10 text-gray-500">{t('dashboard.noActiveListings', 'No active listings yet.')} <Link className="text-primary-700" to="/create-listing">{t('common.createOne', 'Create one')}</Link>.</div> : reviews.length ? reviews.map((review) => <ReviewCard key={review._id} review={{ ...review, authorName: review.reviewer?.name || t('common.user', 'User'), date: new Date(review.createdAt).toLocaleDateString(locale) }}/>) : <p className="text-center py-10 text-gray-500">{t('profile.noReviewsReceived', 'No reviews received yet.')}</p>}</div></section>
-    </div></div>
+    </div>{editing && <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"><form onSubmit={editProfile} className="w-full max-w-xl space-y-3 rounded-2xl bg-white p-6"><div className="flex justify-between"><h2 className="text-xl font-bold">Edit profile</h2><button type="button" onClick={()=>setEditing(false)}>✕</button></div><input required placeholder="Name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="w-full rounded-lg border p-3"/><input placeholder="Phone" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} className="w-full rounded-lg border p-3"/><textarea placeholder="About you" value={form.bio} onChange={e=>setForm({...form,bio:e.target.value})} className="w-full rounded-lg border p-3"/><input placeholder="Village / locality" value={form.location?.village||''} onChange={e=>setForm({...form,location:{...form.location,village:e.target.value}})} className="w-full rounded-lg border p-3"/><div className="grid grid-cols-2 gap-3"><input placeholder="District" value={form.location?.district||''} onChange={e=>setForm({...form,location:{...form.location,district:e.target.value}})} className="rounded-lg border p-3"/><input placeholder="State" value={form.location?.state||''} onChange={e=>setForm({...form,location:{...form.location,state:e.target.value}})} className="rounded-lg border p-3"/></div><button disabled={saving} className="w-full rounded-lg bg-primary-600 p-3 font-bold text-white">{saving?'Saving…':'Save profile'}</button></form></div>}</div>
   );
 };
 

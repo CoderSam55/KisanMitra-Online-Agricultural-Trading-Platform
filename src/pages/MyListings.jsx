@@ -12,6 +12,8 @@ const MyListings = () => {
   const [myListings, setMyListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [editing, setEditing] = useState(null);
+  const [editForm, setEditForm] = useState({});
 
   const loadListings = async () => {
     setLoading(true);
@@ -36,16 +38,12 @@ const MyListings = () => {
     try { await deleteListing(listing.id); toast.success(t('listing.deleted', 'Listing deleted')); await loadListings(); }
     catch (e) { toast.error(e.response?.data?.message || t('listing.deleteError', 'Could not delete listing')); }
   };
-  const handleEdit = async (listing) => {
-    const title = window.prompt(t('listing.title', 'Listing title'), listing.title);
-    if (title === null) return;
-    const price = window.prompt(t('listing.pricePerUnit', 'Price per unit'), String(listing.price));
-    if (price === null) return;
-    const quantity = window.prompt(t('listing.availableQuantity', 'Available quantity'), String(listing.quantity));
-    if (quantity === null) return;
+  const handleEdit = async (event) => {
+    event.preventDefault();
     try {
-      await updateListing(listing.id, { title: title.trim(), price: Number(price), quantity: Number(quantity) });
+      await updateListing(editing.id, { ...editForm, price: Number(editForm.price), quantity: Number(editForm.quantity) });
       toast.success(t('listing.updated', 'Listing updated'));
+      setEditing(null);
       await loadListings();
     } catch (e) { toast.error(e.response?.data?.message || t('listing.updateError', 'Could not update listing')); }
   };
@@ -128,7 +126,7 @@ const MyListings = () => {
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex justify-end gap-2">
-                          <button onClick={() => handleEdit(listing)} title={t('common.edit', 'Edit')} aria-label={t('common.edit', 'Edit')} className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"><Edit size={20} /></button>
+                          <button onClick={() => { setEditing(listing); setEditForm({ title: listing.title, description: listing.description || '', price: listing.price, quantity: listing.quantity, location: listing.location || {} }); }} title={t('common.edit', 'Edit')} aria-label={t('common.edit', 'Edit')} className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"><Edit size={20} /></button>
                           <Link to={`/listing/${listing.id}`} title={t('common.view', 'View')} aria-label={t('common.view', 'View')} className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"><Eye size={20} /></Link>
                           <button onClick={() => handleDelete(listing)} title={t('common.delete', 'Delete')} aria-label={t('common.delete', 'Delete')} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={20} /></button>
                         </div>
@@ -141,6 +139,7 @@ const MyListings = () => {
           </div>
         )}
       </div>
+      {editing && <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"><form onSubmit={handleEdit} className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl space-y-4"><div className="flex justify-between"><h2 className="text-xl font-bold">Edit listing</h2><button type="button" onClick={() => setEditing(null)} className="text-gray-500">✕</button></div><label className="block">Title<input required value={editForm.title} onChange={e=>setEditForm({...editForm,title:e.target.value})} className="mt-1 w-full rounded-lg border p-3"/></label><label className="block">Description<textarea value={editForm.description} onChange={e=>setEditForm({...editForm,description:e.target.value})} className="mt-1 w-full rounded-lg border p-3"/></label><div className="grid grid-cols-2 gap-3"><label>Price<input required min="1" type="number" value={editForm.price} onChange={e=>setEditForm({...editForm,price:e.target.value})} className="mt-1 w-full rounded-lg border p-3"/></label><label>Quantity<input required min="1" type="number" value={editForm.quantity} onChange={e=>setEditForm({...editForm,quantity:e.target.value})} className="mt-1 w-full rounded-lg border p-3"/></label></div><button className="w-full rounded-lg bg-primary-600 py-3 font-bold text-white">Save changes</button></form></div>}
     </div>
   );
 };
